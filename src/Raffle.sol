@@ -20,7 +20,6 @@
 // internal & private view & pure functions
 // external & public view & pure functions
 
-
 // CEI: Checks, Effects, Interactions
 
 //SPDX-License-Identifier: MIT
@@ -48,8 +47,9 @@ contract Raffle is VRFConsumerBaseV2Plus {
      * Type Declarations
      */
     enum RaffleState {
-        OPEN, 
-        CALCULATING}
+        OPEN,
+        CALCULATING
+    }
 
     /**
      * State Variables
@@ -68,8 +68,6 @@ contract Raffle is VRFConsumerBaseV2Plus {
     uint256 private s_lastTimeStamp;
     address private s_recentWinenr;
     RaffleState private s_raffleState;
-
-    
 
     /**
      * Events
@@ -102,7 +100,7 @@ contract Raffle is VRFConsumerBaseV2Plus {
         if (msg.value < i_entranceFee) {
             revert Raffle__NotEnoughEthSent();
         }
-        if(s_raffleState != RaffleState.OPEN) {
+        if (s_raffleState != RaffleState.OPEN) {
             revert Raffle_RaffleNotOpen();
         }
 
@@ -113,8 +111,7 @@ contract Raffle is VRFConsumerBaseV2Plus {
 
     // 1. Get a random number
     // 2. Use the random number to pick a winner
-    // 3. Be automatically called - Automation 
-
+    // 3. Be automatically called - Automation
 
     /**
      * @dev This is the function that the chainlink node will call to see if the lottery is ready to have winner picked.
@@ -127,7 +124,11 @@ contract Raffle is VRFConsumerBaseV2Plus {
      * @return upkeepNeeded - true if it's time to restart the lottery
      * @return - ignored
      */
-    function checkUpkeep(bytes memory /* checkData */) public view returns(bool upkeepNeeded, bytes memory /* performData */){
+    function checkUpkeep(bytes memory /* checkData */ )
+        public
+        view
+        returns (bool upkeepNeeded, bytes memory /* performData */ )
+    {
         bool timeHasPassed = ((block.timestamp - s_lastTimeStamp) >= i_interval);
         bool isOpen = s_raffleState == RaffleState.OPEN;
         bool hasBalance = address(this).balance > 0;
@@ -135,12 +136,10 @@ contract Raffle is VRFConsumerBaseV2Plus {
 
         upkeepNeeded = timeHasPassed && isOpen && hasBalance && hasPlayers;
         return (upkeepNeeded, "");
-
-    } 
-                                                              
+    }
 
     //function pickWinner() external {
-        function performUpKeep(bytes calldata /*performData */ )external {
+    function performUpKeep(bytes calldata /*performData */ ) external {
         // Check to see if enough time has passed
         (bool upkeepNeeded,) = checkUpkeep("");
         if (!upkeepNeeded) {
@@ -149,7 +148,7 @@ contract Raffle is VRFConsumerBaseV2Plus {
         //1. Request the RNG
         // 2. Get the random number
         // 3. Pick a winner
-        s_raffleState = RaffleState.CALCULATING; 
+        s_raffleState = RaffleState.CALCULATING;
         uint256 requestId = s_vrfCoordinator.requestRandomWords(
             VRFV2PlusClient.RandomWordsRequest({
                 keyHash: i_gaslane,
